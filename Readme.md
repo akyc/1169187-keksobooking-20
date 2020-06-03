@@ -1,7 +1,7 @@
 # Личный проект «Кексобукинг» [![Build status][travis-image]][travis-url]
 
 * Студент: [Андрей Зюзин](https://up.htmlacademy.ru/javascript/20/user/1169187).
-* Наставник: `Неизвестно`.
+* Наставник: `Андрей Лутогин`.
 
 ---
 
