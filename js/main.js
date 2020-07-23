@@ -5,8 +5,22 @@
 var map = document.querySelector('.map');
 // Область для меток объявлений
 var mapPins = map.querySelector('.map__pins');
-// Образец метки объявления
+// Образец главной метки объявления
 var pinMain = document.querySelector('.map__pin--main');
+// Ширина главной метки
+var PIN_MAIN_WIDTH = pinMain.offsetWidth;
+// Высота главной метки
+var PIN_MAIN_HEIGHT = pinMain.offsetHeight;
+
+// Переменные фильтров меток на карте
+// Контейнер фильтров
+var mapFilters = document.querySelector('.map__filters');
+
+// Переменные формы "Ваше объявление"
+// Форма
+var adForm = document.querySelector('.ad-form');
+// Поле адрсес
+var address = adForm.querySelector('#address');
 
 // Переменные Template
 // Шамблон метки на карте
@@ -27,6 +41,17 @@ var photosList = ['http://o0.github.io/assets/images/tokyo/hotel1.jpg', 'http://
 var xLimits = {min: pinMain.offsetWidth / 2, max: map.offsetWidth - pinMain.offsetWidth / 2};
 // Интервал значений координат маркета по вертикали
 var yLimits = {min: 130, max: 600};
+
+// Добавляет атрибут disabled элементам формы
+// @param {object} parent форма
+function disablingForm(parent) {
+  var elements = parent.querySelectorAll('button, fieldset, select, textarea, input');
+  elements.forEach(function (element) {
+    element.disabled = true;
+  });
+}
+disablingForm(mapFilters);
+disablingForm(adForm);
 
 // Возвращает случайный элемент массива / массив случайных членов исходного
 // @param {array} arr исходный массив
@@ -59,7 +84,7 @@ function randomIntegers(limits) {
 // @param {int} count число генерируемых объектор
 // @return {array}
 function createPinsList(count) {
-  var rezult = [];
+  var result = [];
   for (var i = 1; i <= count; i++) {
     var newPin = {
       author: {
@@ -83,16 +108,10 @@ function createPinsList(count) {
         photos: randomItem(photosList),
       }
     };
-    rezult.push(newPin);
+    result.push(newPin);
   }
-  return rezult;
+  return result;
 }
-
-// Массив сгенерированных объектов
-var pinsList = createPinsList(8);
-
-// Убираем класс по ТЗ
-map.classList.remove('map--faded');
 
 // Добавляет в DOM элементы меток на основе массива сгенерированных объектов
 // @param {array} arr массив объектов
@@ -108,4 +127,58 @@ function renderPinsList(arr) {
   }
 }
 
-renderPinsList(pinsList);
+// Массив событий и условий для активации страницы
+var activeConditions = [
+  {
+    action: 'mousedown',
+    condition: 0,
+  },
+  {
+    action: 'keydown',
+    condition: 'Enter',
+  },
+];
+
+// Добавляет слушатели событий по условиям активации
+activeConditions.forEach(function (item) {
+  pinMain.addEventListener(item.action, function (evt) {
+    if (evt.button === item.condition || evt.key === item.condition) {
+      activatePage();
+      writeCoords(pinMain);
+    }
+  });
+});
+
+// Редактирует списов классов элементов страницы для ее активации, генерация и отрисовка случайных точек
+function activatePage() {
+  if (map.classList.contains('map--faded')) {
+    map.classList.remove('map--faded');
+    var pinsList = createPinsList(8);
+    renderPinsList(pinsList);
+  }
+  adForm.classList.remove('ad-form--disabled');
+}
+
+// Возвращает координаты указанной метки
+// @param {var} target метка
+// @return {object}
+function getCoords(target) {
+  var result = {};
+  var coordX = Math.floor(target.offsetTop + PIN_MAIN_WIDTH / 2);
+  var coordY = Math.floor(target.offsetLeft + PIN_MAIN_HEIGHT);
+  if (map.classList.contains('map--faded')) {
+    coordY = Math.floor(target.offsetLeft + PIN_MAIN_HEIGHT / 2);
+  }
+  result.x = coordX;
+  result.y = coordY;
+  return result;
+}
+
+// Записывает кооринаты метки в поле адрес
+// @param {var} target метка
+function writeCoords(target) {
+  var coords = getCoords(target);
+  address.value = coords.x + ',' + coords.y;
+}
+
+writeCoords(pinMain);
