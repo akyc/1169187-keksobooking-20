@@ -42,16 +42,20 @@ var xLimits = {min: pinMain.offsetWidth / 2, max: map.offsetWidth - pinMain.offs
 // Интервал значений координат маркета по вертикали
 var yLimits = {min: 130, max: 600};
 
-// Добавляет атрибут disabled элементам формы
+// Добавляет или убирает атрибут disabled элементам формы по флагу
 // @param {object} parent форма
-function disablingForm(parent) {
+// @param {boolean} disabled флаг
+function toggleAblingForm(parent, disabled) {
   var elements = parent.querySelectorAll('button, fieldset, select, textarea, input');
   elements.forEach(function (element) {
-    element.disabled = true;
+    element.disabled = false;
+    if (disabled) {
+      element.disabled = true;
+    }
   });
 }
-disablingForm(mapFilters);
-disablingForm(adForm);
+toggleAblingForm(mapFilters, true);
+toggleAblingForm(adForm, true);
 
 // Возвращает случайный элемент массива / массив случайных членов исходного
 // @param {array} arr исходный массив
@@ -145,6 +149,8 @@ activeConditions.forEach(function (item) {
     if (evt.button === item.condition || evt.key === item.condition) {
       activatePage();
       writeCoords(pinMain);
+      toggleAblingForm(mapFilters, false);
+      toggleAblingForm(adForm, false);
     }
   });
 });
