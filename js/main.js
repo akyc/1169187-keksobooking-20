@@ -170,10 +170,10 @@ function activatePage() {
 // @return {object}
 function getCoords(target) {
   var result = {};
-  var coordX = Math.floor(target.offsetTop + PIN_MAIN_WIDTH / 2);
-  var coordY = Math.floor(target.offsetLeft + PIN_MAIN_HEIGHT);
+  var coordX = Math.floor(target.offsetLeft + PIN_MAIN_WIDTH / 2);
+  var coordY = Math.floor(target.offsetTop + PIN_MAIN_HEIGHT);
   if (map.classList.contains('map--faded')) {
-    coordY = Math.floor(target.offsetLeft + PIN_MAIN_HEIGHT / 2);
+    coordY = Math.floor(target.offsetTop + PIN_MAIN_HEIGHT / 2);
   }
   result.x = coordX;
   result.y = coordY;
