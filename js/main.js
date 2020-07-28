@@ -13,6 +13,8 @@ var pinMain = document.querySelector('.map__pin--main');
 var templatePin = document.querySelector('#pin').content;
 // Элемент метки
 var elementPin = templatePin.querySelector('button');
+// Шаблон карточки объявления
+var templateCard = document.querySelector('#card').content;
 
 // Переменные для генерации объекта
 // Массив типов помещений
@@ -109,3 +111,49 @@ function renderPinsList(arr) {
 }
 
 renderPinsList(pinsList);
+
+//
+function declination(number, words) {
+  var n = Math.abs(number);
+  n %= 100;
+  if (n >= 5 && n <= 20) {
+    return words[3];
+  }
+  n %= 10;
+  if (n === 1) {
+    return words[1];
+  }
+  if (n >= 2 && n <= 4) {
+    return words[2];
+  }
+  return words[3];
+}
+
+// Создает карточки объявлений из сгенерированного массива
+function createCards(ad) {
+  var card = templateCard.querySelector('article');
+  var newCard = card.cloneNode(true);
+  newCard.querySelector('.popup__title').textContent = ad.offer.title;
+  newCard.querySelector('.popup__text--address').textContent = ad.offer.address;
+  newCard.querySelector('.popup__text--price').textContent = ad.offer.price + '₽/ночь';
+  var rusOfferTypes = {
+    flat: 'Квартира',
+    bungalo: 'Бунгало',
+    house: 'Дом',
+    palace: 'Дворец'
+  };
+  newCard.querySelector('.popup__type').textContent = rusOfferTypes[ad.offer.type];
+  var rusRoomsDeclination = declination(ad.offer.rooms, ['комната', 'комнаты', 'комнат']);
+  var rusGuestsDeclination = declination(ad.offer.guests, ['гость', 'гостя', 'гостей']);
+  newCard.querySelector('.popup__text--capacity').textContent = ad.offer.rooms + ' ' + rusRoomsDeclination + ' для ' + ad.offer.guests + ' ' + rusGuestsDeclination;
+  newCard.querySelector('.popup__text--time').textContent = 'Заезд после ' + ad.offer.checkin + ', выезд до ' + ad.offer.checkout;
+  newCard.querySelector('.popup__features').textContent = ad.offer.features.join(', ');
+  newCard.querySelector('.popup__description').textContent = ad.offer.description;
+
+// В блок .popup__description выведите описание объекта недвижимости offer.description.
+// В блок .popup__photos выведите все фотографии из списка offer.photos. Каждая из строк массива photos должна записываться как src соответствующего изображения.
+// Замените src у аватарки пользователя — изображения, которое записано в .popup__avatar — на значения поля author.avatar отрисовываемого объекта.
+}
+
+createCards(pinsList[0]);
+console.log('pinsList[0]: ', pinsList[0]);
