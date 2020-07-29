@@ -133,7 +133,6 @@ function renderPinsList(arr) {
   }
 }
 
-
 // Создает карточки объявлений из сгенерированного массива по шаблону
 // @param {object} ad объявление
 function createCards(ad) {
@@ -232,7 +231,6 @@ function addPopupPhoto(target, photos) {
   imageTemplate.remove();
 }
 
-
 // Массив событий и условий для активации страницы
 var activeConditions = [
   {
@@ -263,7 +261,7 @@ function activatePage() {
     map.classList.remove('map--faded');
     var pinsList = createPinsList(8);
     renderPinsList(pinsList);
-
+    createCards(pinsList[0]);
   }
   adForm.classList.remove('ad-form--disabled');
 }
