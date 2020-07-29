@@ -20,7 +20,7 @@ var templateCard = document.querySelector('#card').content;
 // Массив типов помещений
 var typesList = ['palace', 'flat', 'house', 'bungalo'];
 // Массив времени выезда/заезда
-var checkList = ['12:00', '13:00', '14:00,'];
+var checkList = ['12:00', '13:00', '14:00'];
 // Массив особенностей
 var featuresList = ['wifi', 'dishwasher', 'parking', 'washer', 'elevator', 'conditioner'];
 // Массив фотографий помещения
@@ -76,13 +76,13 @@ function createPinsList(count) {
         address: randomIntegers(xLimits) + ',' + randomIntegers(yLimits),
         price: Math.floor(Math.random() * 10000),
         type: randomItem(typesList),
-        rooms: Math.floor(Math.random() * 4),
-        guests: Math.floor(Math.random() * 5),
+        rooms: randomIntegers({min: 1, max: 6}),
+        guests: randomIntegers({min: 1, max: 8}),
         checkin: randomItem(checkList),
         checkout: randomItem(checkList),
         features: randomItem(featuresList, 4),
         description: 'Описание ' + i,
-        photos: randomItem(photosList),
+        photos: randomItem(photosList, 4),
       }
     };
     rezult.push(newPin);
@@ -112,48 +112,101 @@ function renderPinsList(arr) {
 
 renderPinsList(pinsList);
 
-//
+// Создает карточки объявлений из сгенерированного массива по шаблону
+// @param {object} ad объявление
+function createCards(ad) {
+  var card = templateCard.querySelector('article');
+  var newCard = card.cloneNode(true);
+
+  addTextContent(newCard, '.popup__title', ad.offer.title);
+  addTextContent(newCard, '.popup__text--address', ad.offer.address);
+  addTextContent(newCard, '.popup__text--price', ad.offer.price);
+  addTextContent(newCard, '.popup__type', ad.offer.type);
+  addTextContentCapacity(newCard, '.popup__text--capacity', ad.offer.rooms, ad.offer.guests);
+  newCard.querySelector('.popup__text--time').textContent = 'Заезд после ' + ad.offer.checkin + ', выезд до ' + ad.offer.checkout;
+  addPopupFeatures(newCard, ad.offer.features);
+  addTextContent(newCard, '.popup__description', ad.offer.description);
+  addPopupPhoto(newCard, ad.offer.photos);
+  newCard.querySelector('.popup__avatar').src = ad.author.avatar;
+  map.querySelector('.map__filters-container').before(newCard);
+}
+
+// Создает текстовое содержимое по селектору
+// @param {Node} target клонированный родитель
+// @param {string} selector селектор для поиска в клоне
+// @param {string} info свойство из объявления
+function addTextContent(target, selector, info) {
+  target.querySelector(selector).textContent = info || '';
+  if (selector === '.popup__text--price') {
+    target.querySelector(selector).textContent = info + '₽/ночь' || '';
+  }
+  if (selector === '.popup__type') {
+    var rusOfferTypes = {
+      flat: 'Квартира',
+      bungalo: 'Бунгало',
+      house: 'Дом',
+      palace: 'Дворец'
+    };
+    target.querySelector(selector).textContent = rusOfferTypes[info] || '';
+  }
+}
+
+// Возвращает правильное склонение существительного к заданному числительному
+// @param {int} number числительное
+// @param {array} words варианты склонений
+// @return {string}
 function declination(number, words) {
   var n = Math.abs(number);
   n %= 100;
   if (n >= 5 && n <= 20) {
-    return words[3];
+    return words[2];
   }
   n %= 10;
   if (n === 1) {
-    return words[1];
+    return words[0];
   }
   if (n >= 2 && n <= 4) {
-    return words[2];
+    return words[1];
   }
-  return words[3];
+  return words[2];
 }
 
-// Создает карточки объявлений из сгенерированного массива
-function createCards(ad) {
-  var card = templateCard.querySelector('article');
-  var newCard = card.cloneNode(true);
-  newCard.querySelector('.popup__title').textContent = ad.offer.title;
-  newCard.querySelector('.popup__text--address').textContent = ad.offer.address;
-  newCard.querySelector('.popup__text--price').textContent = ad.offer.price + '₽/ночь';
-  var rusOfferTypes = {
-    flat: 'Квартира',
-    bungalo: 'Бунгало',
-    house: 'Дом',
-    palace: 'Дворец'
-  };
-  newCard.querySelector('.popup__type').textContent = rusOfferTypes[ad.offer.type];
-  var rusRoomsDeclination = declination(ad.offer.rooms, ['комната', 'комнаты', 'комнат']);
-  var rusGuestsDeclination = declination(ad.offer.guests, ['гость', 'гостя', 'гостей']);
-  newCard.querySelector('.popup__text--capacity').textContent = ad.offer.rooms + ' ' + rusRoomsDeclination + ' для ' + ad.offer.guests + ' ' + rusGuestsDeclination;
-  newCard.querySelector('.popup__text--time').textContent = 'Заезд после ' + ad.offer.checkin + ', выезд до ' + ad.offer.checkout;
-  newCard.querySelector('.popup__features').textContent = ad.offer.features.join(', ');
-  newCard.querySelector('.popup__description').textContent = ad.offer.description;
-
-// В блок .popup__description выведите описание объекта недвижимости offer.description.
-// В блок .popup__photos выведите все фотографии из списка offer.photos. Каждая из строк массива photos должна записываться как src соответствующего изображения.
-// Замените src у аватарки пользователя — изображения, которое записано в .popup__avatar — на значения поля author.avatar отрисовываемого объекта.
+// Создает текстовое содержимое
+// @param {Node} target клонированный родитель
+// @param {string} selector селектор для поиска в клоне
+// @param {string} rooms свойство из объявления
+// @param {string} guests свойство из объявления
+function addTextContentCapacity(target, selector, rooms, guests) {
+  var rusRoomsDeclination = declination(rooms, ['комната', 'комнаты', 'комнат']);
+  var rusGuestsDeclination = declination(guests, ['гостя', 'гостей', 'гостей']);
+  target.querySelector(selector).textContent = rooms + ' ' + rusRoomsDeclination + ' для ' + guests + ' ' + rusGuestsDeclination || '';
 }
 
+// Создает список по шаблону из массива
+// @param {Node} target клонированный родитель
+// @param {array} features массив из свойства объявления
+function addPopupFeatures(target, features) {
+  var popupFeatures = target.querySelector('.popup__features');
+  popupFeatures.innerHTML = '';
+  features.forEach(function (feature) {
+    var featureClass = 'popup__feature popup__feature--' + feature;
+    var newFeature = document.createElement('li');
+    newFeature.className = featureClass;
+    popupFeatures.append(newFeature);
+  });
+}
+
+// Добавляет фотографии в карточку объявления
+// @param {Node} target клонированный родитель
+// @param {array} photos массив из свойства объявления
+function addPopupPhoto(target, photos) {
+  var imageTemplate = target.querySelector('.popup__photo');
+  photos.forEach(function (item) {
+    var newImage = imageTemplate.cloneNode(true);
+    newImage.src = item;
+    var popupPhotos = target.querySelector('.popup__photos');
+    popupPhotos.append(newImage);
+  });
+  imageTemplate.remove();
+}
 createCards(pinsList[0]);
-console.log('pinsList[0]: ', pinsList[0]);
